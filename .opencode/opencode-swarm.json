@@ -1,0 +1,50 @@
+{
+  "projectName": "opencode-swarm-web-srv",
+  "version": "1.0.0",
+  "description": "Web visualization dashboard for opencode-swarm multi-agent system",
+  "swarm": {
+    "id": "web-viz",
+    "mode": "default"
+  },
+  "agents": {
+    "architect": {
+      "model": "big-pickle",
+      "enabled": true
+    },
+    "coder": {
+      "enabled": true
+    },
+    "reviewer": {
+      "enabled": true
+    },
+    "explorer": {
+      "enabled": true
+    },
+    "test_engineer": {
+      "enabled": true
+    },
+    "sme": {
+      "enabled": true
+    },
+    "docs": {
+      "enabled": true
+    }
+  },
+  "qaGates": {
+    "reviewer": true,
+    "test_engineer": true,
+    "sme_enabled": true,
+    "critic_pre_plan": true,
+    "sast_enabled": true,
+    "council_mode": false,
+    "hallucination_guard": false,
+    "mutation_test": false,
+    "council_general_review": false,
+    "drift_check": true
+  },
+  "paths": {
+    "swarmDir": ".swarm",
+    "evidenceDir": ".swarm/evidence",
+    "sessionDir": ".swarm/session"
+  }
+}
