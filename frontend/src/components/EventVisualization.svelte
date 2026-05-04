@@ -2,6 +2,12 @@
   import { onMount, onDestroy, afterUpdate } from 'svelte';
   import type { TelemetryEvent } from '../lib/event-types';
   import { getEventColor } from '../lib/event-types';
+  import { API_URL as CONFIG_API_URL, POLL_INTERVAL, TELEMETRY_LIMIT } from '../lib/config';
+
+  /**
+   * Пропсы компонента
+   */
+  export let apiUrl: string = `${CONFIG_API_URL}/api/telemetry?limit=${TELEMETRY_LIMIT}`;
 
   /**
    * Типы для режимов получения данных
@@ -21,9 +27,8 @@
     color: string;
   }
 
-  // Конфигурация
-  const POLL_INTERVAL = 2000; // 2 секунды
-  const API_URL = '/api/telemetry?limit=50';
+  // Конфигурация с использованием central config
+  const API_URL = apiUrl;
 
   // Состояние компонента
   let events: DisplayEvent[] = [];
@@ -212,9 +217,10 @@
           WebSocket
         </button>
       </div>
-      <span class="status" class:connected={isConnected}>
-        {isConnected ? 'Connected' : 'Disconnected'}
-      </span>
+      <div class="status-indicator" class:connected={isConnected}>
+        <span class="status-dot"></span>
+        <span class="status-text">{isConnected ? 'Connected' : 'Disconnected'}</span>
+      </div>
     </div>
   </div>
 
@@ -311,7 +317,10 @@
     cursor: not-allowed;
   }
 
-  .status {
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
     font-size: 0.75rem;
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
@@ -319,9 +328,20 @@
     color: #dc2626;
   }
 
-  .status.connected {
+  .status-indicator.connected {
     background: #dcfce7;
     color: #16a34a;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #dc2626;
+  }
+
+  .status-indicator.connected .status-dot {
+    background: #16a34a;
   }
 
   .error-message {

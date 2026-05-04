@@ -4,6 +4,7 @@
   import EventVisualization from './components/EventVisualization.svelte';
   import { AGENTS, type AgentType, type AgentStatus, type AgentSize } from './lib/agent-types';
   import type { Task } from './lib/task-types';
+  import { API_URL, TELEMETRY_LIMIT } from './lib/config';
 
   const agentTypes: AgentType[] = ['architect', 'coder', 'reviewer', 'explorer', 'test_engineer', 'sme', 'docs'];
   const statuses: AgentStatus[] = ['pending', 'in_progress', 'completed', 'blocked'];
@@ -16,6 +17,9 @@
     { id: '103', title: 'Написать документацию', status: 'completed', description: 'Создать README и API docs' },
     { id: '104', title: 'Исправить баг с БД', status: 'blocked', description: 'Зависит от обновления PostgreSQL' },
   ];
+
+  // Формируем URL для telemetry API
+  const telemetryApiUrl = `${API_URL}/api/telemetry?limit=${TELEMETRY_LIMIT}`;
 </script>
 
 <h1>Swarm Telemetry Dashboard</h1>
@@ -73,7 +77,7 @@
 
 <section>
   <h2>Telemetry Feed</h2>
-  <EventVisualization />
+  <EventVisualization apiUrl={telemetryApiUrl} />
 </section>
 
 <style>
