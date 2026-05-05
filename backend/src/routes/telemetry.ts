@@ -1,30 +1,51 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import Fastify from 'fastify';
 import * as path from 'path';
-import { parseTelemetryFile, type TelemetryFilterParams } from '../services/telemetry-parser.js';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { parseTelemetryFile, type TelemetryFilterParams } from '../services/telemetry-parser.ts';
+
+// ESM эквивалент __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * Регистрирует маршруты телеметрии в Fastify приложении
  * @param fastify - экземпляр Fastify
  */
-export async function telemetryRoutes(fastify: FastifyInstance): Promise<void> {
+export async function telemetryRoutes(fastify: Fastify.FastifyInstance): Promise<void> {
   // Маршрут GET /api/telemetry для получения исторических данных
   fastify.get<{ Querystring: TelemetryQueryParams }>(
     '/api/telemetry',
-    async (request: FastifyRequest<{ Querystring: TelemetryQueryParams }>, _reply: FastifyReply) => {
+    {
+      schema: {
+        querystring: {
+          type: 'object',
+          properties: {
+            from: { type: 'number', minimum: 0 },
+            to: { type: 'number', minimum: 0 },
+            eventType: { type: 'string', minLength: 1 },
+            agentId: { type: 'string', minLength: 1 },
+            limit: { type: 'number', minimum: 1, maximum: 1000 }
+          },
+          additionalProperties: false
+        }
+      }
+    },
+    async (request: Fastify.FastifyRequest<{ Querystring: TelemetryQueryParams }>, _reply: Fastify.FastifyReply) => {
       const { from, to, eventType, agentId, limit } = request.query;
 
-      // Базовая валидация параметров
+      // Параметры уже валидированы схемой Fastify с автоматическим преобразованием типов
       const params: TelemetryFilterParams = {};
 
       if (from !== undefined) {
-        if (typeof from !== 'number' || from < 0) {
+        if (from < 0) {
           return _reply.status(400).send({ error: 'Invalid "from" parameter: must be a positive number' });
         }
         params.from = from;
       }
 
       if (to !== undefined) {
-        if (typeof to !== 'number' || to < 0) {
+        if (to < 0) {
           return _reply.status(400).send({ error: 'Invalid "to" parameter: must be a positive number' });
         }
         params.to = to;
@@ -35,28 +56,28 @@ export async function telemetryRoutes(fastify: FastifyInstance): Promise<void> {
       }
 
       if (eventType !== undefined) {
-        if (typeof eventType !== 'string' || eventType.length === 0) {
+        if (eventType.length === 0) {
           return _reply.status(400).send({ error: 'Invalid "eventType" parameter: must be a non-empty string' });
         }
         params.eventType = eventType;
       }
 
       if (agentId !== undefined) {
-        if (typeof agentId !== 'string' || agentId.length === 0) {
+        if (agentId.length === 0) {
           return _reply.status(400).send({ error: 'Invalid "agentId" parameter: must be a non-empty string' });
         }
         params.agentId = agentId;
       }
 
       if (limit !== undefined) {
-        if (typeof limit !== 'number' || limit < 1 || limit > 1000) {
+        if (limit < 1 || limit > 1000) {
           return _reply.status(400).send({ error: 'Invalid "limit" parameter: must be a number between 1 and 1000' });
         }
         params.limit = limit;
       }
 
-      // Путь к файлу telemetry.jsonl (в корне проекта, на уровень выше backend)
-      const telemetryFilePath = path.resolve(process.cwd(), '..', '.swarm', 'telemetry.jsonl');
+      // Путь к файлу telemetry.jsonl (в корне проекта)
+      const telemetryFilePath = path.resolve(__dirname, '..', '..', '..', '.swarm', 'telemetry.jsonl');
 
       // Читаем и фильтруем данные (функция сама обработает отсутствие файла)
       const result = await parseTelemetryFile(telemetryFilePath, params);

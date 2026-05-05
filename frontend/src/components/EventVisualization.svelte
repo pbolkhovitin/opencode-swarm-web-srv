@@ -24,6 +24,7 @@
     readableTime: string;
     eventType: string;
     agentId: string | null;
+    agentType: AgentType | null; // Извлекаемый тип агента для отображения аватара
     eventSummary: string;
     color: string;
   }
@@ -31,7 +32,7 @@
   // Конфигурация с использованием central config
   const API_URL = apiUrl;
 
-  // Состояние компонента
+  // Состояние компонента (Svelte 4 реактивность)
   let events: DisplayEvent[] = [];
   let isConnected = false;
   let lastError: string | null = null;
@@ -45,18 +46,18 @@
   const VIRTUAL_SCROLL_BUFFER = 10; // Количество элементов сверху/снизу видимой области
   const ITEM_HEIGHT = 72; // Примерная высота элемента в пикселях
 
-  // Состояние виртуального скролла
+  // Состояние виртуального скролла (Svelte 4 реактивность)
   let scrollTop = 0;
   let containerHeight = 0;
 
-  // Вычисляемые значения для виртуального скролла (оптимизировано через reactive statement)
+  // Вычисляемые значения для виртуального скролла (Svelte 4 через $:)
   $: totalHeight = events.length * ITEM_HEIGHT;
   $: startIndex = Math.max(0, Math.floor(scrollTop / ITEM_HEIGHT) - VIRTUAL_SCROLL_BUFFER);
   $: endIndex = Math.min(events.length, Math.ceil((scrollTop + containerHeight) / ITEM_HEIGHT) + VIRTUAL_SCROLL_BUFFER);
   $: visibleEvents = events.slice(startIndex, endIndex);
   $: offsetY = startIndex * ITEM_HEIGHT;
 
-  // Debounce для быстрых обновлений
+  // Debounce для быстрых обновлений (Svelte 4 реактивность)
   let pendingEvents: DisplayEvent[] = [];
   let rafId: number | null = null;
   let isUpdateScheduled = false;
@@ -86,7 +87,6 @@
    * Обработчик скролла с использованием requestAnimationFrame
    * Оптимизация: не обновляем состояние на каждом событии скролла
    */
-  let scrollRafId: number | null = null;
   function handleScroll(event: Event): void {
     const target = event.target as HTMLDivElement;
 
@@ -136,6 +136,60 @@
   }
 
   /**
+   * Извлечение типа агента из agentId (session ID) или данных события
+   * agentId может быть.session ID (например, "ses_21264035cffednT5G6MbsulJ0L")
+   * Тип агента может быть в data.sessionId, data.agentName или мы пробуем определить по префиксу
+   */
+  function extractAgentType(agentId: string | undefined, data: unknown): AgentType | null {
+    if (!agentId) {
+      return null;
+    }
+
+    // Пробуем получить из data.sessionId (для task_state_changed)
+    if (typeof data === 'object' && data !== null) {
+      const obj = data as Record<string, unknown>;
+      if (obj.sessionId && typeof obj.sessionId === 'string') {
+        const sessionId = obj.sessionId.toLowerCase();
+        // Маппинг sessionId к типу агента
+        if (sessionId.includes('architect')) return 'architect';
+        if (sessionId.includes('coder')) return 'coder';
+        if (sessionId.includes('reviewer')) return 'reviewer';
+        if (sessionId.includes('explorer')) return 'explorer';
+        if (sessionId.includes('test_engineer') || sessionId.includes('test')) return 'test_engineer';
+        if (sessionId.includes('sme')) return 'sme';
+        if (sessionId.includes('docs')) return 'docs';
+      }
+    }
+
+    // Пробуем получить из data.agentName (fallback)
+    if (typeof data === 'object' && data !== null) {
+      const obj = data as Record<string, unknown>;
+      if (obj.agentName && typeof obj.agentName === 'string') {
+        const agentName = obj.agentName.toLowerCase();
+        // Маппинг имени к типу агента
+        if (agentName.includes('architect')) return 'architect';
+        if (agentName.includes('coder')) return 'coder';
+        if (agentName.includes('reviewer')) return 'reviewer';
+        if (agentName.includes('explorer')) return 'explorer';
+        if (agentName.includes('test_engineer') || agentName.includes('test engineer')) return 'test_engineer';
+        if (agentName.includes('sme')) return 'sme';
+        if (agentName.includes('docs')) return 'docs';
+      }
+    }
+
+    // Пробуем определить по префиксу session ID
+    // Формат: ses_xxx или agentType_xxx
+    const prefix = agentId.split('_')[0];
+    if (prefix === 'architect' || prefix === 'coder' || prefix === 'reviewer' ||
+        prefix === 'explorer' || prefix === 'test' || prefix === 'sme' || prefix === 'docs') {
+      if (prefix === 'test') return 'test_engineer';
+      return prefix as AgentType;
+    }
+
+    return null;
+  }
+
+  /**
    * Создание краткого описания из данных события
    */
   function createEventSummary(data: unknown): string {
@@ -179,6 +233,7 @@
       readableTime: formatTimestamp(raw.timestamp),
       eventType: raw.eventType,
       agentId: raw.agentId || null,
+      agentType: extractAgentType(raw.agentId, raw.data), // Извлекаем тип агента
       eventSummary: createEventSummary(raw.data),
       color: getEventColor(raw.eventType),
     };
@@ -254,13 +309,11 @@
     }
   }
 
-  // Автопрокрутка после обновления списка
+  // Обновление высоты контейнера после каждого обновления
   // Оптимизация: измеряем контейнер после каждого обновления
   afterUpdate(() => {
     measureContainer();
-    if (eventListEl && events.length > 0) {
-      eventListEl.scrollTop = 0; // Новые события сверху - не нужно прокручивать
-    }
+    // Не сбрасываем scrollTop - пусть пользователь сам управляет скроллом
   });
 
   // Lifecycle
@@ -288,13 +341,13 @@
       <div class="mode-switch">
         <button
           class:active={connectionMode === 'polling'}
-          on:click={() => switchMode('polling')}
+          onclick={() => switchMode('polling')}
         >
           Polling
         </button>
         <button
           class:active={connectionMode === 'websocket'}
-          on:click={() => switchMode('websocket')}
+          onclick={() => switchMode('websocket')}
           disabled
         >
           WebSocket
@@ -321,7 +374,7 @@
   <div
     class="event-list"
     bind:this={eventListEl}
-    on:scroll={handleScroll}
+    onscroll={handleScroll}
   >
     {#if events.length === 0}
       <div class="empty-state">No events yet</div>
@@ -336,8 +389,8 @@
               <div class="event-content">
                 <div class="event-meta">
                   <span class="event-time">{event.readableTime}</span>
-                  {#if event.agentId && AGENTS[event.agentId as AgentType]}
-                    {@const agent = AGENTS[event.agentId as AgentType]}
+                  {#if event.agentType && AGENTS[event.agentType]}
+                    {@const agent = AGENTS[event.agentType]}
                     <span class="event-agent" style="background-color: {agent.color}">
                       {agent.icon} {agent.name}
                     </span>

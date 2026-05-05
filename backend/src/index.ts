@@ -1,11 +1,16 @@
 import Fastify from 'fastify';
 import { createServer } from 'http';
-import type { TelemetryEvent } from './types/telemetry.js';
-import { setupFileWatcher, stopFileWatcher } from './services/file-watcher.js';
-import { telemetryRoutes } from './routes/telemetry.js';
+import type { TelemetryEvent } from './types/telemetry.ts';
+import { setupFileWatcher, stopFileWatcher } from './services/file-watcher.ts';
+import { telemetryRoutes } from './routes/telemetry.ts';
 
 const fastify = Fastify({
   logger: true,
+  ajv: {
+    customOptions: {
+      coerceTypes: true
+    }
+  }
 });
 
 // CORS настройка - разрешаем запросы с frontend (localhost:5173)

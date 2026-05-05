@@ -1,6 +1,6 @@
 import { createReadStream } from 'fs';
 import { createInterface } from 'readline';
-import type { TelemetryEvent } from '../types/telemetry.js';
+import type { TelemetryEvent } from '../types/telemetry.ts';
 
 /**
  * Интерфейс для параметров фильтрации телеметрии
