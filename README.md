@@ -1,32 +1,32 @@
 # opencode-swarm-web-srv
 
-> Real-time web visualization dashboard for monitoring OpenCode Swarm multi-agent orchestration.
+> Веб-панель визуализации для мониторинга многозадачной оркестрации OpenCode Swarm в реальном времени.
 
-> **Status:** Phase 1 MVP COMPLETE ✅ | Phase 2-4 IN PROGRESS 🔄
+> **Статус:** Phase 1 MVP COMPLETE ✅ | Phase 2-4 IN PROGRESS 🔄
 
-## 📋 Concept
+## 📋 Концепция
 
-**OpenCode Swarm** is a multi-agent orchestration system where specialized AI agents (Architect, Coder, Reviewer, etc.) collaborate to complete software development tasks. This project provides a **web-based visualization dashboard** that monitors and displays swarm sessions in real-time.
+**OpenCode Swarm** — это система многозадачной оркестрации, где специализированные AI-агенты (Architect, Coder, Reviewer, Explorer, Test Engineer, SME и Docs) сотрудничают для выполнения задач разработки ПО. Этот проект предоставляет **веб-панель визуализации** для мониторинга и отображения сессий swarm в реальном времени.
 
-**What does this dashboard do?**
-- Visualizes all 7 agent types as distinct entities with status indicators ✅
-- Shows task delegation flows between agents (animation pending) ⏳
-- Streams events from `.swarm/telemetry.jsonl` via polling (2s interval) 🔄
-- Provides historical timeline views of past sessions with filtering ✅
-- Maintains performance with virtual scrolling (Svelte 4 + requestAnimationFrame) 🚀
+**Что делает эта панель?**
+- Визуализирует все 7 типов агентов как отдельные сущности с индикаторами статуса ✅
+- Показывает потоки делегирования задач между агентами (анимация ожидает) ⏳
+- Потоковая передача событий из `.swarm/telemetry.jsonl` через опрос (интервал 2с) 🔄
+- Предоставляет исторические представления временной шкалы прошлых сессий с фильтрацией ✅
+- Поддерживает производительность с виртуальной прокруткой (Svelte 4 + requestAnimationFrame) 🚀
 
-## ✨ Features (MVP Status)
+## ✨ Функции (Статус MVP)
 
-- **7 Agent Types Visualization** - Architect, Coder, Reviewer, Explorer, Test Engineer, SME, and Docs agents with unique avatars ✅
-- **Real-time Updates** - Polling-based updates every 2 seconds (WebSocket deferred to post-MVP) 🔄
-- **Task Flow Animation** - Animated directional arrows showing task delegation between agents (Pending: Phase 3) ⏳
-- **Agent Status Display** - Visual states: pending, in_progress, completed, blocked ✅
-- **Historical Data** - Timeline view with filtering by agent type, task status, and time range ✅
-- **Task Lifecycle Tracking** - Full visibility into task transitions with timestamps and duration ✅
-- **Read-only Safety** - Never modifies `.swarm/` directory files ✅
-- **Performance Optimized** - Virtual scrolling with requestAnimationFrame, Svelte 4 reactive statements ($:) 🚀
+- **Визуализация 7 типов агентов** - Агенты Architect, Coder, Reviewer, Explorer, Test Engineer, SME и Docs с уникальными аватарами ✅
+- **Обновления в реальном времени** - Обновления на основе опроса каждые 2 секунды (WebSocket отложен до пост-MVP) 🔄
+- **Анимация потока задач** - Анимированные направленные стрелки, показывающие делегирование задач между агентами (Ожидает: Фаза 3) ⏳
+- **Отображение статуса агента** - Визуальные состояния: pending, in_progress, completed, blocked ✅
+- **Исторические данные** - Представление временной шкалы с фильтрацией по типу агента, статусу задачи и временному диапазону ✅
+- **Отслеживание жизненного цикла задачи** - Полная видимость переходов задач с временными метками и продолжительностью ✅
+- **Безопасность только для чтения** - Никогда не изменяет файлы в директории `.swarm/` ✅
+- **Оптимизация производительности** - Виртуальная прокрутка с requestAnimationFrame, реактивные выражения Svelte 4 ($:) 🚀
 
-## 🏗️ Architecture Overview (MVP)
+## 🏗️ Обзор архитектуры (MVP)
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -38,7 +38,7 @@
 │  └──────────────────────┬──────────────────────┘   │
 │                          │ HTTP Polling (2s)        │
 └──────────────────────────┼──────────────────────────┘
-                           │
+                            │
 ┌──────────────────────────┼──────────────────────────┐
 │  Backend (Fastify)       │                          │
 │  ┌──────────────────────┴──────────────────────┐   │
@@ -49,48 +49,48 @@
 │  └──────────────────────┬──────────────────────┘   │
 │                          │ read-only                │
 └──────────────────────────┼──────────────────────────┘
-                           │
-                    ┌──────┴──────┐
-                    │  .swarm/     │
-                    │  telemetry   │
-                    │  .jsonl      │
-                    └─────────────┘
+                            │
+                     ┌──────┴──────┐
+                     │  .swarm/     │
+                     │  telemetry   │
+                     │  .jsonl      │
+                     └─────────────┘
 ```
 
-### Components
+### Компоненты
 
-| Component | Technology | Responsibility |
+| Компонент | Технология | Ответственность |
 |-----------|------------|----------------|
-| Frontend Dashboard | Svelte 4 + Vite + TypeScript | Visualize agents, tasks, and events |
-| Backend API Server | Node.js + Fastify + TypeScript | Serve REST API (polling mode) |
-| Telemetry Parser | Node.js streams + readline | Parse telemetry.jsonl with error handling |
-| File Watcher | chokidar (ready, unused in MVP) | Monitor `.swarm/telemetry.jsonl` for changes |
+| Frontend Dashboard | Svelte 4 + Vite + TypeScript | Визуализация агентов, задач и событий |
+| Backend API Server | Node.js + Fastify + TypeScript | Обслуживание REST API (режим опроса) |
+| Telemetry Parser | Node.js streams + readline | Парсинг telemetry.jsonl с обработкой ошибок |
+| File Watcher | chokidar (готов, не используется в MVP) | Мониторинг `.swarm/telemetry.jsonl` на изменения |
 
-## 🛠️ Tech Stack
+## 🛠️ Технологический стек
 
 ### Backend
 - **Runtime**: Node.js
 - **Language**: TypeScript (strict mode)
-- **Framework**: Fastify (with AJV coerceTypes for query params)
-- **WebSocket**: @fastify/websocket (disabled for MVP)
-- **File Parsing**: Node.js fs streams + readline
+- **Framework**: Fastify (с AJV coerceTypes для параметров запроса)
+- **WebSocket**: @fastify/websocket (отключен для MVP)
+- **Парсинг файлов**: Node.js fs streams + readline
 
 ### Frontend
-- **Framework**: Svelte 4 (NOT Svelte 5 - uses $: reactive statements)
+- **Framework**: Svelte 4 (НЕ Svelte 5 - использует $: реактивные выражения)
 - **Build Tool**: Vite
 - **Language**: TypeScript
-- **Performance**: Virtual scrolling with requestAnimationFrame
+- **Производительность**: Виртуальная прокрутка с requestAnimationFrame
 
-### Data Source
-- **Telemetry File**: `.swarm/telemetry.jsonl` (read-only, JSONL format)
+### Источник данных
+- **Telemetry File**: `.swarm/telemetry.jsonl` (только чтение, формат JSONL)
 
-## 📋 Prerequisites
+## 📋 Предварительные требования
 
-- **Node.js** v18 or higher
-- **npm** v8 or higher (or equivalent package manager)
-- A running OpenCode Swarm session with `.swarm/telemetry.jsonl` present
+- **Node.js** v18 или выше
+- **npm** v8 или выше (или эквивалентный пакетный менеджер)
+- Запущенная сессия OpenCode Swarm с присутствующим `.swarm/telemetry.jsonl`
 
-## 📦 Installation
+## 📦 Установка
 
 ```bash
 # Clone the repository
@@ -106,11 +106,11 @@ cd ../frontend
 npm install
 ```
 
-## 🚀 Development
+## 🚀 Разработка
 
-Run both backend and frontend in development mode:
+Запустите и backend, и frontend в режиме разработки:
 
-### Terminal 1 - Backend
+### Терминал 1 - Backend
 ```bash
 cd backend
 npm install
@@ -122,7 +122,7 @@ npm run dev
 #   - GET  /api/telemetry?limit=50&eventType=... - Historical data with filtering
 ```
 
-### Terminal 2 - Frontend
+### Терминал 2 - Frontend
 ```bash
 cd frontend
 npm install
@@ -131,9 +131,9 @@ npm run dev
 # Dashboard available at http://localhost:5173
 ```
 
-**Note:** MVP uses **polling mode** (frontend polls `GET /api/telemetry` every 2 seconds). WebSocket support is disabled until post-MVP phases.
+**Примечание:** MVP использует **режим опроса** (frontend опрашивает `GET /api/telemetry` каждые 2 секунды). Поддержка WebSocket отключена до пост-MVP фаз.
 
-## 🏗️ Building for Production
+## 🏗️ Сборка для продакшена
 
 ```bash
 # Install dependencies (if not done yet)
@@ -151,7 +151,7 @@ npm run build
 # Output: frontend/dist/
 ```
 
-### Running in Production
+### Запуск в продакшене
 
 ```bash
 # Start backend server (from backend directory)
@@ -165,7 +165,7 @@ npx vite preview
 # Or serve the dist/ folder with your preferred web server
 ```
 
-## 📁 Project Structure
+## 📁 Структура проекта
 
 ```
 opencode-swarm-web-srv/
@@ -221,11 +221,11 @@ opencode-swarm-web-srv/
 └── README.md                   # This file
 ```
 
-## 📄 Specification
+## 📄 Спецификация
 
-The full project specification is documented in [.swarm/spec.md](.swarm/spec.md) and includes:
+Полная спецификация проекта документирована в [.swarm/spec.md](.swarm/spec.md) и включает:
 
-### Functional Requirements (FR-001 to FR-012)
+### Функциональные требования (FR-001 to FR-012)
 - FR-001: Agent Visualization (all 7 agent types) ✅
 - FR-002: Agent Status Display (4 visual states) ✅
 - FR-003: Task Delegation Flow (animated arrows) ⏳
@@ -239,7 +239,7 @@ The full project specification is documented in [.swarm/spec.md](.swarm/spec.md)
 - FR-011: Local Development Support (CORS) ✅
 - FR-012: Multi-session Support (deferred)
 
-### Success Criteria (SC-001 to SC-006)
+### Критерии успеха (SC-001 to SC-006)
 - SC-001: Agent Display Verification (2s load time) ✅
 - SC-002: Real-time Update Verification (polling: ~2s latency) ✅
 - SC-003: Animation Performance Verification (virtual scroll) 🚀
@@ -247,20 +247,20 @@ The full project specification is documented in [.swarm/spec.md](.swarm/spec.md)
 - SC-005: Read-only Compliance Verification ✅
 - SC-006: Historical Data Retrieval (<500ms for 10k events) ✅
 
-## 📋 Implementation Plan
+## 📋 План реализации
 
-The implementation plan is documented in [.swarm/plan.md](.swarm/plan.md) and consists of:
+План реализации документирован в [.swarm/plan.md](.swarm/plan.md) и состоит из:
 
-| Phase | Name | Status | Tasks |
-|-------|------|--------|-------|
-| 1 | Project Setup & Scaffolding | ✅ **COMPLETE** | 7 tasks (1.1-1.7) |
-| 2 | Backend Development | 🔄 **IN PROGRESS** | 3 tasks (2.1-2.3) |
-| 3 | Frontend Visualization | 🔄 **IN PROGRESS** | 3 tasks (3.1-3.3) |
-| 4 | Integration & Testing | 🔄 **IN PROGRESS** | 3 tasks (4.1-4.3) |
+| Фаза | Название | Статус | Задачи |
+|------|----------|--------|-------|
+| 1 | Настройка проекта и скаффолдинг | ✅ **COMPLETE** | 7 tasks (1.1-1.7) |
+| 2 | Разработка Backend | 🔄 **IN PROGRESS** | 3 tasks (2.1-2.3) |
+| 3 | Визуализация Frontend | 🔄 **IN PROGRESS** | 3 tasks (3.1-3.3) |
+| 4 | Интеграция и тестирование | 🔄 **IN PROGRESS** | 3 tasks (4.1-4.3) |
 
-**Total:** 16 tasks across 4 phases
+**Всего:** 16 задач в 4 фазах
 
-### Phase 1 Completed Tasks (6/7):
+### Фаза 1 Завершённые задачи (6/7):
 - 1.1: Initialize backend package.json with Fastify/TypeScript dependencies ✅
 - 1.2: Configure TypeScript for backend with strict mode ✅
 - 1.3: Scaffold Svelte+Vite frontend with TypeScript ✅
@@ -270,64 +270,64 @@ The implementation plan is documented in [.swarm/plan.md](.swarm/plan.md) and co
 - 1.7: Fix critical issues: directory confusion, entry point, code duplication ✅
 - 1.8: Create telemetry event generator for testing (pending) ⏳
 
-### Phase 2 In Progress (2/3):
+### Фаза 2 В процессе (2/3):
 - 2.1: Implement REST API for historical telemetry data with filtering ✅
 - 2.2: Add CORS support and security headers for local development ✅
 - 2.3: Handle telemetry file rotation and malformed lines (IN PROGRESS) 🔄
 
-### Phase 3 In Progress (1/3):
+### Фаза 3 В процессе (1/3):
 - 3.1: Implement task delegation flow visualization with animated arrows (pending) ⏳
 - 3.2: Create real-time event visualization with WebSocket client (deferred) ⏳
 - 3.3: Add timeline view for historical data with filtering ✅
 
-### Phase 4 In Progress (2/3):
+### Фаза 4 В процессе (2/3):
 - 4.1: Connect frontend to backend API (polling mode) ✅
 - 4.2: Validate all 7 agent types display correctly ✅
 - 4.3: Performance optimization to maintain 60fps (IN PROGRESS) 🔄
 
-## 🚦 Current Status (MVP)
+## 🚦 Текущий статус (MVP)
 
 > **Phase 1: Project Setup & Scaffolding - COMPLETE ✅**
 > **MVP: Basic visualization working with polling mode 🔄**
 
-The MVP is functional with the following features implemented:
-- ✅ Backend running on `:3000` with REST API (GET /api/telemetry, GET /health)
-- ✅ Frontend running on `:5173` with Svelte 4 (virtual scrolling, agent avatars)
-- ✅ Polling mode working (2-second intervals via `POLL_INTERVAL`)
-- ✅ Historical data with filtering (eventType, agentId, from/to, limit)
-- ✅ JSON Schema validation with `coerceTypes: true` for query params
-- ✅ Agent type extraction from `sessionId` and `agentName` in telemetry data
-- ✅ Virtual scrolling with `requestAnimationFrame` for performance
-- ✅ Scroll position preserved (no more jumping to top)
+MVP функционален со следующими реализованными функциями:
+- ✅ Backend работает на `:3000` с REST API (GET /api/telemetry, GET /health)
+- ✅ Frontend работает на `:5173` с Svelte 4 (виртуальная прокрутка, аватары агентов)
+- ✅ Режим опроса работает (2-секундные интервалы через `POLL_INTERVAL`)
+- ✅ Исторические данные с фильтрацией (eventType, agentId, from/to, limit)
+- ✅ JSON Schema валидация с `coerceTypes: true` для параметров запроса
+- ✅ Извлечение типа агента из `sessionId` и `agentName` в данных телеметрии
+- ✅ Виртуальная прокрутка с `requestAnimationFrame` для производительности
+- ✅ Позиция прокрутки сохранена (больше нет прыжков)
 
-**Recent Fixes:**
+**Последние исправления:**
 - 🔧 Fixed scroll jumping (removed `scrollTop = 0` assignment)
 - 🔧 Fixed `extractAgentType()` to check `data.sessionId` properly
 - 🔧 Replaced Svelte 5 syntax (`$state`/`$derived`) with Svelte 4 (`$:`, reactive statements)
 - 🔧 Fixed telemetry.jsonl path (3 levels `../..` for ESM modules)
 - 🔧 Fixed CORS configuration for `localhost:5173`
 
-**Progress:** 9/16 tasks completed (9 completed, 3 in progress, 4 pending)
+**Прогресс:** 9/16 задач завершено (9 завершено, 3 в процессе, 4 ожидают)
 
-## 🤝 Contributing
+## 🤝 Участие
 
-This project is part of the OpenCode Swarm ecosystem. The development follows a multi-agent orchestration workflow:
+Этот проект является частью экосистемы OpenCode Swarm. Разработка следует многозадачному рабочему процессу оркестрации:
 
-1. **Architect** decomposes tasks and coordinates the swarm
-2. **Coder** implements the code changes
-3. **Reviewer** reviews code for quality and correctness
-4. **Test Engineer** writes and runs tests
-5. **Docs** updates documentation
+1. **Architect** декомпозирует задачи и координирует рой
+2. **Coder** реализует изменения кода
+3. **Reviewer** проверяет код на качество и корректность
+4. **Test Engineer** пишет и запускает тесты
+5. **Docs** обновляет документацию
 
-See [AGENTS.md](AGENTS.md) for the full agent configuration.
+См. [AGENTS.md](AGENTS.md) для полной конфигурации агентов.
 
-## 📜 License
+## 📜 Лицензия
 
-[License information to be added]
+[Информация о лицензии будет добавлена]
 
 ---
 
-## 📚 References
+## 📚 Ссылки
 
 - [OpenCode Swarm Documentation](https://github.com/opencode-ai/opencode)
 - [Fastify Documentation](https://www.fastify.io/)
@@ -336,4 +336,4 @@ See [AGENTS.md](AGENTS.md) for the full agent configuration.
 
 ---
 
-*Last Updated: 2026-05-05*
+*Последнее обновление: 2026-05-05*
