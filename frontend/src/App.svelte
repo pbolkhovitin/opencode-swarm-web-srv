@@ -8,7 +8,7 @@
 
   const agentTypes: AgentType[] = ['architect', 'coder', 'reviewer', 'explorer', 'test_engineer', 'sme', 'docs'];
   const statuses: AgentStatus[] = ['pending', 'in_progress', 'completed', 'blocked'];
-  const sizes: AgentSize[] = ['sm', 'md', 'lg'];
+  const sizes: AgentSize[] = ['small', 'medium', 'large'];
 
   // Примеры задач для каждого статуса
   const tasks: Task[] = [
@@ -28,10 +28,10 @@
 <section>
   <h2>Agent Avatars</h2>
   <div class="agent-grid">
-    {#each agentTypes as agentId}
+    {#each agentTypes as agentType}
       <div class="agent-item">
-        <AgentAvatar {agentId} size="md" status="pending" />
-        <span class="agent-name">{AGENTS[agentId].name}</span>
+        <AgentAvatar {agentType} size="medium" status="pending" />
+        <span class="agent-name">{AGENTS[agentType].name}</span>
       </div>
     {/each}
   </div>
@@ -42,7 +42,7 @@
   <div class="status-grid">
     {#each statuses as status}
       <div class="status-item">
-        <AgentAvatar agentId="coder" size="md" {status} />
+        <AgentAvatar agentType="coder" size="medium" {status} />
         <span class="status-name">{status}</span>
       </div>
     {/each}
@@ -54,7 +54,7 @@
   <div class="size-grid">
     {#each sizes as size}
       <div class="size-item">
-        <AgentAvatar agentId="architect" {size} status="completed" />
+        <AgentAvatar agentType="architect" {size} status="completed" />
         <span class="size-name">{size}</span>
       </div>
     {/each}

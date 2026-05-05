@@ -79,8 +79,11 @@ export async function parseTelemetryFile(
             rl.close();
             readStream.destroy();
           }
-        } catch {
+        } catch (parseError) {
           errors++;
+          console.warn(
+            `Malformed line ${totalLines}: ${trimmed.substring(0, 80)}... Error: ${parseError}`
+          );
         }
       });
 

@@ -102,7 +102,11 @@ function onFileChanged(): void {
 
       lastFileSize = newSize;
     } else if (newSize < lastFileSize) {
-      // Файл был усечен или перезаписан
+      // Файл был усечен или перезаписан (ротация)
+      fastifyInstance.log.warn(
+        { oldSize: lastFileSize, newSize },
+        'Telemetry file rotated/truncated, re-reading from beginning'
+      );
       lastFileSize = 0;
       readInitialEvents();
     }

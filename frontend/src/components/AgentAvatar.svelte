@@ -2,11 +2,11 @@
   import { AGENTS, AGENT_STATUS_STYLES, AGENT_SIZES, type AgentType, type AgentStatus, type AgentSize } from '../lib/agent-types';
   import { fade, scale } from 'svelte/transition';
 
-  export let agentId: AgentType;
-  export let size: AgentSize = 'md';
+  export let agentType: AgentType;
+  export let size: AgentSize = 'medium';
   export let status: AgentStatus = 'pending';
 
-  $: agent = AGENTS[agentId];
+  $: agent = AGENTS[agentType];
   $: statusStyle = AGENT_STATUS_STYLES[status];
   $: pixelSize = AGENT_SIZES[size];
   $: fontSize = Math.round(pixelSize * 0.5);

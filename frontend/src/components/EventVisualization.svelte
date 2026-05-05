@@ -3,6 +3,7 @@
   import type { TelemetryEvent } from '../lib/event-types';
   import { getEventColor } from '../lib/event-types';
   import { API_URL as CONFIG_API_URL, POLL_INTERVAL, TELEMETRY_LIMIT } from '../lib/config';
+  import { AGENTS, type AgentType } from '../lib/agent-types';
 
   /**
    * Пропсы компонента
@@ -37,6 +38,76 @@
   let connectionMode: ConnectionMode = 'polling';
   let pollingInterval: ReturnType<typeof setInterval> | null = null;
   let eventListEl: HTMLDivElement;
+
+  // === PERFORMANCE OPTIMIZATIONS ===
+
+  // Виртуальный скролл: конфигурация
+  const VIRTUAL_SCROLL_BUFFER = 10; // Количество элементов сверху/снизу видимой области
+  const ITEM_HEIGHT = 72; // Примерная высота элемента в пикселях
+
+  // Состояние виртуального скролла
+  let scrollTop = 0;
+  let containerHeight = 0;
+
+  // Вычисляемые значения для виртуального скролла (оптимизировано через reactive statement)
+  $: totalHeight = events.length * ITEM_HEIGHT;
+  $: startIndex = Math.max(0, Math.floor(scrollTop / ITEM_HEIGHT) - VIRTUAL_SCROLL_BUFFER);
+  $: endIndex = Math.min(events.length, Math.ceil((scrollTop + containerHeight) / ITEM_HEIGHT) + VIRTUAL_SCROLL_BUFFER);
+  $: visibleEvents = events.slice(startIndex, endIndex);
+  $: offsetY = startIndex * ITEM_HEIGHT;
+
+  // Debounce для быстрых обновлений
+  let pendingEvents: DisplayEvent[] = [];
+  let rafId: number | null = null;
+  let isUpdateScheduled = false;
+
+  /**
+   * Debounced обновление событий через requestAnimationFrame
+   * Предотвращает множественные перерисовки при быстрых обновлениях
+   */
+  function scheduleEventUpdate(newEvents: DisplayEvent[]): void {
+    pendingEvents = newEvents;
+
+    if (!isUpdateScheduled) {
+      isUpdateScheduled = true;
+      rafId = requestAnimationFrame(() => {
+        // Проверяем, нужно ли обновить (сравниваем длину или содержимое)
+        if (pendingEvents.length > 0) {
+          events = pendingEvents;
+          pendingEvents = [];
+        }
+        isUpdateScheduled = false;
+        rafId = null;
+      });
+    }
+  }
+
+  /**
+   * Обработчик скролла с использованием requestAnimationFrame
+   * Оптимизация: не обновляем состояние на каждом событии скролла
+   */
+  let scrollRafId: number | null = null;
+  function handleScroll(event: Event): void {
+    const target = event.target as HTMLDivElement;
+
+    if (scrollRafId !== null) {
+      cancelAnimationFrame(scrollRafId);
+    }
+
+    scrollRafId = requestAnimationFrame(() => {
+      scrollTop = target.scrollTop;
+      scrollRafId = null;
+    });
+  }
+
+  /**
+   * Измерение высоты контейнера для виртуального скролла
+   */
+  function measureContainer(): void {
+    if (eventListEl) {
+      containerHeight = eventListEl.clientHeight;
+    }
+  }
 
   /**
    * Форматирование timestamp в читаемый вид
@@ -115,6 +186,7 @@
 
   /**
    * Загрузка событий через polling
+   * Оптимизация: использует scheduleEventUpdate для debounced обновления через rAF
    */
   async function fetchEvents(): Promise<void> {
     try {
@@ -131,7 +203,8 @@
         .map((e, i) => transformEvent(e, i))
         .sort((a, b) => b.timestamp - a.timestamp);
 
-      events = transformed;
+      // Используем debounced обновление через requestAnimationFrame
+      scheduleEventUpdate(transformed);
       isConnected = true;
       lastError = null;
     } catch (error) {
@@ -182,7 +255,9 @@
   }
 
   // Автопрокрутка после обновления списка
+  // Оптимизация: измеряем контейнер после каждого обновления
   afterUpdate(() => {
+    measureContainer();
     if (eventListEl && events.length > 0) {
       eventListEl.scrollTop = 0; // Новые события сверху - не нужно прокручивать
     }
@@ -190,11 +265,19 @@
 
   // Lifecycle
   onMount(() => {
+    measureContainer();
     startPolling();
   });
 
   onDestroy(() => {
     stopPolling();
+    // Очистка всех pending requestAnimationFrame
+    if (rafId !== null) {
+      cancelAnimationFrame(rafId);
+    }
+    if (scrollRafId !== null) {
+      cancelAnimationFrame(scrollRafId);
+    }
   });
 </script>
 
@@ -228,28 +311,48 @@
     <div class="error-message">{lastError}</div>
   {/if}
 
-  <div class="event-list" bind:this={eventListEl}>
+  <!--
+    Оптимизация виртуального скролла:
+    - totalHeight создает пространство для всей прокрутки
+    - offsetY смещает видимые элементы
+    - visibleEvents содержит только элементы в видимой области + буфер
+    - handleScroll использует requestAnimationFrame для плавности
+  -->
+  <div
+    class="event-list"
+    bind:this={eventListEl}
+    on:scroll={handleScroll}
+  >
     {#if events.length === 0}
       <div class="empty-state">No events yet</div>
     {:else}
-      {#each events as event (event.id)}
-        <div class="event-item">
-          <div class="event-badge" style="background-color: {event.color}">
-            {event.eventType}
-          </div>
-          <div class="event-content">
-            <div class="event-meta">
-              <span class="event-time">{event.readableTime}</span>
-              {#if event.agentId}
-                <span class="event-agent">{event.agentId}</span>
-              {/if}
+      <div class="virtual-scroll-container" style="height: {totalHeight}px;">
+        <div class="virtual-scroll-content" style="transform: translateY({offsetY}px);">
+          {#each visibleEvents as event (event.id)}
+            <div class="event-item">
+              <div class="event-badge" style="background-color: {event.color}">
+                {event.eventType}
+              </div>
+              <div class="event-content">
+                <div class="event-meta">
+                  <span class="event-time">{event.readableTime}</span>
+                  {#if event.agentId && AGENTS[event.agentId as AgentType]}
+                    {@const agent = AGENTS[event.agentId as AgentType]}
+                    <span class="event-agent" style="background-color: {agent.color}">
+                      {agent.icon} {agent.name}
+                    </span>
+                  {:else if event.agentId}
+                    <span class="event-agent">{event.agentId}</span>
+                  {/if}
+                </div>
+                {#if event.eventSummary}
+                  <div class="event-summary">{event.eventSummary}</div>
+                {/if}
+              </div>
             </div>
-            {#if event.eventSummary}
-              <div class="event-summary">{event.eventSummary}</div>
-            {/if}
-          </div>
+          {/each}
         </div>
-      {/each}
+      </div>
     {/if}
   </div>
 </div>
@@ -355,6 +458,24 @@
     flex: 1;
     overflow-y: auto;
     padding: 0.5rem;
+    /* Оптимизация: содержание не должно влиять на layout */
+    contain: strict;
+  }
+
+  /* Виртуальный скролл - контейнер с фиксированной высотой */
+  .virtual-scroll-container {
+    position: relative;
+    width: 100%;
+  }
+
+  /* Виртуальный скролл - контент с трансформацией */
+  .virtual-scroll-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    /* Оптимизация: GPU-ускорение для трансформации */
+    will-change: transform;
   }
 
   .empty-state {
@@ -408,10 +529,13 @@
 
   .event-agent {
     padding: 0.125rem 0.375rem;
-    background: #f1f5f9;
     border-radius: 4px;
-    color: #475569;
     font-weight: 500;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
   }
 
   .event-summary {

@@ -6,7 +6,7 @@ export type AgentType = 'architect' | 'coder' | 'reviewer' | 'explorer' | 'test_
 
 export type AgentStatus = 'pending' | 'in_progress' | 'completed' | 'blocked';
 
-export type AgentSize = 'sm' | 'md' | 'lg';
+export type AgentSize = 'small' | 'medium' | 'large';
 
 export interface Agent {
   id: AgentType;
@@ -88,7 +88,7 @@ export const AGENT_STATUS_STYLES: Record<AgentStatus, { border: string; shadow: 
 };
 
 export const AGENT_SIZES: Record<AgentSize, number> = {
-  sm: 32,
-  md: 48,
-  lg: 64,
+  small: 32,
+  medium: 48,
+  large: 64,
 };

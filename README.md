@@ -61,7 +61,7 @@
 | Frontend Dashboard | Svelte 4+ + Vite + TypeScript | Visualize agents, tasks, and events |
 | Backend API Server | Node.js + Fastify + TypeScript | Serve API and WebSocket connections |
 | WebSocket Service | ws (WebSocket library) | Stream real-time events to dashboard |
-| File Watcher | Node.js fs.watch | Monitor `.swarm/telemetry.jsonl` for changes |
+| File Watcher | chokidar | Monitor `.swarm/telemetry.jsonl` for changes |
 
 ## 🛠️ Tech Stack
 
@@ -70,7 +70,7 @@
 - **Language**: TypeScript (strict mode)
 - **Framework**: Fastify
 - **WebSocket**: @fastify/websocket
-- **File Watching**: Node.js fs.watch
+- **File Watching**: chokidar
 
 ### Frontend
 - **Framework**: Svelte 4+
@@ -229,7 +229,7 @@ The implementation plan is documented in [.swarm/plan.md](.swarm/plan.md) and co
 
 | Phase | Name | Status | Tasks |
 |-------|------|--------|-------|
-| 1 | Project Setup & Scaffolding | ✅ **COMPLETE** | 5 tasks (1.1-1.5) |
+| 1 | Project Setup & Scaffolding | ✅ **COMPLETE** | 6 tasks (1.1-1.6) |
 | 2 | Backend Development | 🔄 **IN PROGRESS** | 3 tasks (2.1-2.3) |
 | 3 | Frontend Visualization | PENDING | 4 tasks (3.1-3.4) |
 | 4 | Integration & Testing | PENDING | 3 tasks (4.1-4.3) |
@@ -242,16 +242,16 @@ The implementation plan is documented in [.swarm/plan.md](.swarm/plan.md) and co
 - 1.3: Scaffold Svelte+Vite frontend with TypeScript ✅
 - 1.4: Create backend entry point with Fastify server and telemetry types ✅
 - 1.5: Implement WebSocket service and file watcher for .swarm/telemetry.jsonl ✅
-
+- 1.6: Define frontend agent types and Svelte AgentAvatar component ✅
 For detailed task descriptions and dependencies, see [TODO.md](TODO.md).
 
 ## 🚦 Current Status
 
 > **Phase 1: Project Setup & Scaffolding - COMPLETE**
 
-The project scaffolding is complete. Backend (Fastify + TypeScript) and frontend (Svelte + Vite + TypeScript) have been initialized with working build systems.
+The project scaffolding is complete. Backend (Fastify + TypeScript) and frontend (Svelte + Vite + TypeScript) have been initialized with working build systems. Frontend agent types and AgentAvatar Svelte component have been implemented.
 
-**Progress:** 5/15 tasks completed (5 completed, 10 pending)
+**Progress:** 6/15 tasks completed (6 completed, 9 pending)
 
 ## 🤝 Contributing
 
@@ -280,4 +280,4 @@ See [AGENTS.md](AGENTS.md) for the full agent configuration.
 
 ---
 
-*Last Updated: 2026-05-03*
+*Last Updated: 2026-05-04*
