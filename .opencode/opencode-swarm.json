@@ -1,1 +1,106 @@
-{}
+{
+  "agents": {
+    "architect": {
+      "model": "nvidia/Llama-3.3-Nemotron-Super-49B-v1_5"
+    },
+    "coder": {
+      "model": "mistralai/devstral-2-123b-instruct-2512",
+      "fallback_models": [
+        "mistralai/Devstral-Small-2505",
+        "nvidia/Llama-3.3-Nemotron-Super-49B-v1_5"
+      ]
+    },
+    "reviewer": {
+      "model": "mistralai/mistral-7b-instruct",
+      "fallback_models": [
+        "NousResearch 2/DeepHermes-3-Mistral-24B-Preview",
+        "nvidia/Llama-3.3-Nemotron-Super-49B-v1_5"
+      ]
+    },
+    "test_engineer": {
+      "model": "mistralai/Devstral-Small-2505",
+      "fallback_models": [
+        "mistralai/devstral-2-123b-instruct-2512",
+        "nvidia/Llama-3.3-Nemotron-Super-49B-v1_5"
+      ]
+    },
+    "explorer": {
+      "model": "mistralai/mistral-tiny",
+      "fallback_models": [
+        "mistralai/ministral-3b-2512",
+        "nvidia/Llama-3.3-Nemotron-Super-49B-v1_5"
+      ]
+    },
+    "sme": {
+      "model": "soob3123/Veiled-Calla-12B",
+      "fallback_models": [
+        "mistralai/mistral-tiny",
+        "nvidia/Llama-3.3-Nemotron-Super-49B-v1_5"
+      ]
+    },
+    "docs": {
+      "model": "mistralai/ministral-3b-2512",
+      "fallback_models": [
+        "mistralai/ministral-8b-2512",
+        "nvidia/Llama-3.3-Nemotron-Super-49B-v1_5"
+      ]
+    },
+    "critic": {
+      "model": "nvidia/Llama-3.3-Nemotron-Super-49B-v1_5",
+      "fallback_models": [
+        "mistralai/mistral-7b-instruct",
+        "opencode/big-pickle"
+      ]
+    },
+    "designer": {
+      "model": "nvidia/Llama-3.3-Nemotron-Super-49B-v1_5",
+      "fallback_models": [
+        "mistralai/mistral-7b-instruct",
+        "opencode/big-pickle"
+      ]
+    },
+    "critic_sounding_board": {
+      "model": "mistralai/mistral-7b-instruct",
+      "fallback_models": [
+        "nvidia/Llama-3.3-Nemotron-Super-49B-v1_5",
+        "opencode/big-pickle"
+      ]
+    },
+    "critic_drift_verifier": {
+      "model": "mistralai/mistral-7b-instruct",
+      "fallback_models": [
+        "nvidia/Llama-3.3-Nemotron-Super-49B-v1_5",
+        "opencode/big-pickle"
+      ]
+    },
+    "critic_hallucination_verifier": {
+      "model": "mistralai/mistral-7b-instruct",
+      "fallback_models": [
+        "nvidia/Llama-3.3-Nemotron-Super-49B-v1_5",
+        "opencode/big-pickle"
+      ]
+    },
+    "critic_oversight": {
+      "model": "mistralai/mistral-7b-instruct",
+      "fallback_models": [
+        "nvidia/Llama-3.3-Nemotron-Super-49B-v1_5",
+        "opencode/big-pickle"
+      ]
+    },
+    "curator_init": {
+      "model": "mistralai/mistral-7b-instruct",
+      "fallback_models": [
+        "nvidia/Llama-3.3-Nemotron-Super-49B-v1_5",
+        "opencode/big-pickle"
+      ]
+    },
+    "curator_phase": {
+      "model": "mistralai/mistral-7b-instruct",
+      "fallback_models": [
+        "nvidia/Llama-3.3-Nemotron-Super-49B-v1_5",
+        "opencode/big-pickle"
+      ]
+    }
+  },
+  "max_iterations": 5
+}

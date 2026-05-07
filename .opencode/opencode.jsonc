@@ -1,0 +1,17 @@
+{
+  // Основная модель - заменяем проблематичную gpt-5-nano на бесплатную альтернативу
+  "model": "nvidia/Llama-3.3-Nemotron-Super-49B-v1_5",
+  // Малая модель для subagent (test_engineer, reviewer, coder и др.) — бесплатная, без rate limit
+  "small_model": "opencode/nemotron-3-super-free",
+
+  // Переопределяем модели для разных агентов для оптимизации стоимости и производительности
+  "agentModels": {
+    "architect": "nvidia/Llama-3.3-Nemotron-Super-49B-v1_5",
+    "coder": "mistralai/devstral-2-123b-instruct-2512",
+    "reviewer": "mistralai/mistral-7b-instruct",
+    "test_engineer": "mistralai/Devstral-Small-2505",
+    "explorer": "mistralai/mistral-tiny",
+    "sme": "soob3123/Veiled-Calla-12B",
+    "docs": "mistralai/ministral-3b-2512"
+  }
+}
